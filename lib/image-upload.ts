@@ -6,10 +6,14 @@ export interface UploadResult {
   success: boolean
   filePath?: string
   error?: string
+  publicId?: string
+  width?: number
+  height?: number
+  size?: number
 }
 
 /**
- * Upload an image file to the public/images/products directory
+ * Upload an image file to Cloudinary
  */
 export async function uploadProductImage(file: File): Promise<UploadResult> {
   try {
@@ -58,7 +62,11 @@ export async function uploadProductImage(file: File): Promise<UploadResult> {
     const result = await response.json()
     return {
       success: true,
-      filePath: result.filePath
+      filePath: result.filePath,
+      publicId: result.publicId,
+      width: result.width,
+      height: result.height,
+      size: result.size
     }
 
   } catch (error) {
@@ -71,16 +79,16 @@ export async function uploadProductImage(file: File): Promise<UploadResult> {
 }
 
 /**
- * Delete an image from the public/images/products directory
+ * Delete an image from Cloudinary
  */
-export async function deleteProductImage(filePath: string): Promise<boolean> {
+export async function deleteProductImage(filePath: string, publicId?: string): Promise<boolean> {
   try {
     const response = await fetch('/api/upload/delete-product-image', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ filePath }),
+      body: JSON.stringify({ filePath, publicId }),
     })
 
     return response.ok
@@ -96,10 +104,11 @@ export async function deleteProductImage(filePath: string): Promise<boolean> {
 export function getProductImageUrl(filePath: string): string {
   if (!filePath) return '/placeholder.svg'
   
-  // If it's already a full URL or starts with /, return as is
-  if (filePath.startsWith('http') || filePath.startsWith('/')) {
-    return filePath
-  }
+  // If it's already a full URL (Cloudinary or other CDN), return as is
+  if (filePath.startsWith('http')) return filePath
+  
+  // If it's a local path starting with /, return as is (for fallback)
+  if (filePath.startsWith('/')) return filePath
   
   // Otherwise, construct the path
   return `/images/products/${filePath}`

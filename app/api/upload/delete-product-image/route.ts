@@ -1,27 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { unlink } from 'fs/promises'
-import path from 'path'
+import { deleteFromCloudinary } from '@/lib/cloudinary'
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { filePath } = await request.json()
+    const { filePath, publicId } = await request.json()
 
-    if (!filePath) {
-      return NextResponse.json({ error: 'No file path provided' }, { status: 400 })
+    if (!filePath && !publicId) {
+      return NextResponse.json({ error: 'No file path or public ID provided' }, { status: 400 })
     }
 
-    // Extract filename from path
-    const filename = path.basename(filePath)
-    
-    // Construct full path
-    const fullPath = path.join(process.cwd(), 'public', 'images', 'products', filename)
+    let deleteSuccess = false
 
-    try {
-      await unlink(fullPath)
+    if (publicId) {
+      // Delete using Cloudinary public ID (preferred method)
+      deleteSuccess = await deleteFromCloudinary(publicId)
+    } else if (filePath) {
+      // Extract public ID from Cloudinary URL
+      const urlParts = filePath.split('/')
+      const fileWithExt = urlParts[urlParts.length - 1]
+      const extractedPublicId = `tools-solutions/products/${fileWithExt.split('.')[0]}`
+      deleteSuccess = await deleteFromCloudinary(extractedPublicId)
+    }
+
+    if (deleteSuccess) {
       return NextResponse.json({ success: true })
-    } catch (error) {
-      // File might not exist, that's okay
-      return NextResponse.json({ success: true })
+    } else {
+      return NextResponse.json({ error: 'Failed to delete file' }, { status: 500 })
     }
 
   } catch (error) {
