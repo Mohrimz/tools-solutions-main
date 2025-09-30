@@ -1,0 +1,61 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#gradient)" stroke="url(#strokeGradient)" stroke-width="4"/>
+  
+  <!-- Gear Shape -->
+  <g transform="translate(100, 100)">
+    <!-- Main gear body -->
+    <circle r="45" fill="#1a1a1a"/>
+    
+    <!-- Gear teeth -->
+    <g fill="url(#orangeBlue)">
+      <!-- 8 gear teeth around the circle -->
+      <rect x="-3" y="-55" width="6" height="10" rx="1"/>
+      <rect x="-3" y="45" width="6" height="10" rx="1"/>
+      <rect x="-55" y="-3" width="10" height="6" rx="1"/>
+      <rect x="45" y="-3" width="10" height="6" rx="1"/>
+      
+      <!-- Diagonal teeth -->
+      <g transform="rotate(45)">
+        <rect x="-3" y="-55" width="6" height="10" rx="1"/>
+        <rect x="-3" y="45" width="6" height="10" rx="1"/>
+        <rect x="-55" y="-3" width="10" height="6" rx="1"/>
+        <rect x="45" y="-3" width="10" height="6" rx="1"/>
+      </g>
+    </g>
+    
+    <!-- Center circle -->
+    <circle r="30" fill="#000" stroke="url(#orangeBlue)" stroke-width="2"/>
+    
+    <!-- Tools inside -->
+    <g stroke="url(#toolsGradient)" stroke-width="3" fill="none" stroke-linecap="round">
+      <!-- Wrench -->
+      <path d="M -15 -10 L -5 0 L 5 -10 M -5 0 L 5 10 L 15 0" />
+      <!-- Screwdriver -->
+      <path d="M 10 -15 L 10 15 M 5 -15 L 15 -15 M 8 15 L 12 15" />
+    </g>
+  </g>
+  
+  <!-- Definitions -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff9500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a90e2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff7700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357abd;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="orangeBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff9500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4a90e2;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="toolsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a90e2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff9500;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
