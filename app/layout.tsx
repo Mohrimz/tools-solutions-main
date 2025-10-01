@@ -19,10 +19,15 @@ const titilliumWeb = V0_Font_Titillium_Web({
 })
 
 export const metadata: Metadata = {
-  title: "Tools Solutions - Professional Hand Tools Sri Lanka",
+  title: "Tool Solutions",
   description:
     "Sri Lanka's trusted source for professional-grade hand tools. Quality tools at honest prices with island-wide delivery.",
   generator: "v0.app",
+  icons: {
+    icon: '/log.jpg',
+    shortcut: '/log.jpg',
+    apple: '/log.jpg',
+  },
 }
 
 export default function RootLayout({
