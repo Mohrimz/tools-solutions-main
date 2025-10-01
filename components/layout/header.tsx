@@ -160,28 +160,6 @@ export function Header() {
                       Wishlist
                     </Link>
                   </Button>
-                  
-                  {/* Mobile Auth */}
-                  <SignedOut>
-                    <SignInButton mode="modal">
-                      <Button variant="outline" className="justify-start bg-transparent">
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Sign In with Google
-                      </Button>
-                    </SignInButton>
-                  </SignedOut>
-                  <SignedIn>
-                    <div className="flex items-center space-x-3 p-2 rounded-md border">
-                      <UserButton 
-                        appearance={{
-                          elements: {
-                            avatarBox: "h-8 w-8"
-                          }
-                        }}
-                      />
-                      <span className="text-sm font-medium">Account</span>
-                    </div>
-                  </SignedIn>
                 </div>
               </div>
             </SheetContent>
