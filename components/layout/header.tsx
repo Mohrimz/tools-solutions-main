@@ -29,7 +29,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-6">
         <Link href="/" className="flex items-center space-x-2 mr-6">
-          <img src="/log.jpg" alt="Tools Solutions" className="h-12 w-12 rounded-md object-cover" />
+          <img src="/log.png" alt="Tools Solutions" className="h-12 w-12 rounded-md object-cover" />
           <span className="font-bold text-lg">Tools Solutions</span>
         </Link>
 
@@ -99,7 +99,7 @@ export function Header() {
               <div className="flex flex-col space-y-4 mt-6">
                 {/* Mobile Logo */}
                 <div className="flex items-center justify-center mb-6 p-4">
-                  <img src="/log.jpg" alt="Tools Solutions" className="h-20 w-20 rounded-lg object-cover" />
+                  <img src="/log.png" alt="Tools Solutions" className="h-20 w-20 rounded-lg object-cover" />
                 </div>
 
                 {/* Mobile Search */}

@@ -25,9 +25,9 @@ export const metadata: Metadata = {
     "Sri Lanka's trusted source for professional-grade hand tools. Quality tools at honest prices with island-wide delivery.",
   generator: "v0.app",
   icons: {
-    icon: '/log.jpg',
-    shortcut: '/log.jpg',
-    apple: '/log.jpg',
+    icon: '/log.png',
+    shortcut: '/log.png',
+    apple: '/log.png',
   },
 }
 
