@@ -29,7 +29,7 @@ import type { ProductFormData } from "@/lib/schemas/product-schema"
 import { ProductFormDrawer } from "@/components/admin/product-form-drawer"
 
 export default function AdminProductsPage() {
-  const { products, addProduct, updateProduct, deleteProducts, duplicateProduct, exportCsv, importCsv } =
+  const { products, loadProducts, addProduct, updateProduct, deleteProducts, duplicateProduct, exportCsv, importCsv } =
     useProductStore()
 
   const [filters, setFilters] = useState<ProductFilters>({})
@@ -39,6 +39,11 @@ export default function AdminProductsPage() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [csvImportOpen, setCsvImportOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Load products on mount
+  useEffect(() => {
+    loadProducts()
+  }, [loadProducts])
 
   const editingProductData = editingProduct ? products.find((p) => p.id === editingProduct) : null
   
@@ -120,10 +125,10 @@ export default function AdminProductsPage() {
     }
   }
 
-  const handleCreateProduct = (productData: ProductFormData) => {
+  const handleCreateProduct = async (productData: ProductFormData) => {
     try {
       console.log("[v0] Creating product:", productData)
-      addProduct(productData)
+      await addProduct(productData)
       setIsFormOpen(false)
       setEditingProduct(null)
       toast({
@@ -148,7 +153,7 @@ export default function AdminProductsPage() {
     }
   }
 
-  const handleUpdateProduct = (productData: ProductFormData) => {
+  const handleUpdateProduct = async (productData: ProductFormData) => {
     if (!editingProduct) {
       toast({
         title: "Error",
@@ -172,7 +177,7 @@ export default function AdminProductsPage() {
         return
       }
 
-      updateProduct(editingProduct, productData)
+      await updateProduct(editingProduct, productData)
       setEditingProduct(null)
       setIsFormOpen(false)
       toast({
@@ -189,10 +194,10 @@ export default function AdminProductsPage() {
     }
   }
 
-  const handleDeleteProduct = (productId: string) => {
+  const handleDeleteProduct = async (productId: string) => {
     try {
       const product = products.find((p) => p.id === productId)
-      deleteProducts([productId])
+      await deleteProducts([productId])
       setDeleteConfirmId(null)
       toast({
         title: "Product deleted",
@@ -208,9 +213,9 @@ export default function AdminProductsPage() {
     }
   }
 
-  const handleDuplicateProduct = (productId: string) => {
+  const handleDuplicateProduct = async (productId: string) => {
     try {
-      duplicateProduct(productId)
+      await duplicateProduct(productId)
       toast({
         title: "Product duplicated",
         description: "Product has been duplicated successfully.",
@@ -225,27 +230,31 @@ export default function AdminProductsPage() {
     }
   }
 
-  const handleBulkAction = (action: string) => {
+  const handleBulkAction = async (action: string) => {
     const selectedCount = selectedProducts.length
 
     try {
       switch (action) {
         case "activate":
-          selectedProducts.forEach((id) => updateProduct(id, { isActive: true }))
+          for (const id of selectedProducts) {
+            await updateProduct(id, { isActive: true })
+          }
           toast({
             title: "Products activated",
             description: `${selectedCount} products have been activated.`,
           })
           break
         case "deactivate":
-          selectedProducts.forEach((id) => updateProduct(id, { isActive: false }))
+          for (const id of selectedProducts) {
+            await updateProduct(id, { isActive: false })
+          }
           toast({
             title: "Products deactivated",
             description: `${selectedCount} products have been deactivated.`,
           })
           break
         case "delete":
-          deleteProducts(selectedProducts)
+          await deleteProducts(selectedProducts)
           toast({
             title: "Products deleted",
             description: `${selectedCount} products have been deleted.`,

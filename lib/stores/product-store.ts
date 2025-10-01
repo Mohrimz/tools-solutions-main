@@ -1,23 +1,22 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
 import type { Product } from "@/lib/types"
-import { mockProducts } from "@/lib/mock-data"
 import { generateSlug } from "@/lib/utils"
 
 interface ProductStore {
   products: Product[]
+  isLoading: boolean
 
   // Actions
-  addProduct: (productData: Omit<Product, "id" | "createdAt" | "slug">) => void
-  updateProduct: (id: string, patch: Partial<Omit<Product, "id" | "createdAt" | "slug">>) => void
-  deleteProducts: (ids: string[]) => void
-  duplicateProduct: (id: string) => void
-  importCsv: (rows: Product[], strategy: "append" | "replace") => void
+  loadProducts: () => Promise<void>
+  addProduct: (productData: Omit<Product, "id" | "createdAt" | "slug">) => Promise<void>
+  updateProduct: (id: string, patch: Partial<Omit<Product, "id" | "createdAt" | "slug">>) => Promise<void>
+  deleteProducts: (ids: string[]) => Promise<void>
+  duplicateProduct: (id: string) => Promise<void>
+  importCsv: (rows: Product[], strategy: "append" | "replace") => Promise<void>
   exportCsv: (filtered: Product[]) => string
 
   // Utilities
   getProduct: (id: string) => Product | undefined
-  setProducts: (products: Product[]) => void
 }
 
 const generateUniqueSlug = (name: string, existingProducts: Product[], excludeId?: string): string => {
@@ -33,135 +32,182 @@ const generateUniqueSlug = (name: string, existingProducts: Product[], excludeId
   return slug
 }
 
-export const useProductStore = create<ProductStore>()(
-  persist(
-    (set, get) => ({
-      products: mockProducts,
-
-      addProduct: (productData) => {
-        const products = get().products
-        const id = crypto.randomUUID()
-        const slug = generateUniqueSlug(productData.name, products)
-        const createdAt = new Date().toISOString()
-
-        const newProduct: Product = {
-          ...productData,
-          id,
-          slug,
-          createdAt,
-          rating: productData.rating || 4,
-          images: productData.images?.length ? productData.images : ["/placeholder.svg"],
-          specs: productData.specs || {},
-        }
-
-        set({ products: [newProduct, ...products] })
-      },
-
-      updateProduct: (id, patch) => {
-        const products = get().products
-        const updatedProducts = products.map((product) => {
-          if (product.id === id) {
-            const updated = { ...product, ...patch }
-            // Regenerate slug if name changed
-            if (patch.name && patch.name !== product.name) {
-              updated.slug = generateUniqueSlug(patch.name, products, id)
-            }
-            return updated
-          }
-          return product
-        })
-        set({ products: updatedProducts })
-      },
-
-      deleteProducts: (ids) => {
-        const products = get().products
-        set({ products: products.filter((p) => !ids.includes(p.id)) })
-      },
-
-      duplicateProduct: (id) => {
-        const products = get().products
-        const original = products.find((p) => p.id === id)
-        if (!original) return
-
-        const duplicated: Product = {
-          ...original,
-          id: crypto.randomUUID(),
-          name: `${original.name} (Copy)`,
-          sku: `${original.sku}-COPY`,
-          slug: generateUniqueSlug(`${original.name} (Copy)`, products),
-          createdAt: new Date().toISOString(),
-        }
-
-        set({ products: [duplicated, ...products] })
-      },
-
-      importCsv: (rows, strategy) => {
-        const products = get().products
-        const validRows = rows.map((row) => ({
-          ...row,
-          id: row.id || crypto.randomUUID(),
-          slug: row.slug || generateUniqueSlug(row.name, strategy === "replace" ? [] : products),
-          createdAt: row.createdAt || new Date().toISOString(),
-          rating: row.rating || 4,
-          images: row.images || ["/placeholder.svg"],
-          specs: row.specs || {},
-        }))
-
-        if (strategy === "replace") {
-          set({ products: validRows })
-        } else {
-          set({ products: [...validRows, ...products] })
-        }
-      },
-
-      exportCsv: (filtered) => {
-        const headers = [
-          "id",
-          "name",
-          "slug",
-          "sku",
-          "priceLKR",
-          "stock",
-          "category",
-          "isActive",
-          "rating",
-          "images",
-          "description",
-        ]
-
-        const csvRows = [
-          headers.join(","),
-          ...filtered.map((product) =>
-            [
-              product.id,
-              `"${product.name}"`,
-              product.slug,
-              product.sku,
-              product.priceLKR,
-              product.stock,
-              product.category,
-              product.isActive,
-              product.rating,
-              `"${product.images.join("|")}"`,
-              `"${product.description || ""}"`,
-            ].join(","),
-          ),
-        ]
-
-        return csvRows.join("\n")
-      },
-
-      getProduct: (id) => {
-        return get().products.find((p) => p.id === id)
-      },
-
-      setProducts: (products) => {
-        set({ products })
-      },
-    }),
-    {
-      name: "product-store",
-      version: 1,
+// API helper functions
+const apiCall = async (action: string, data?: any) => {
+  const response = await fetch('/api/products', {
+    method: action === 'LOAD_PRODUCTS' ? 'GET' : 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-  ),
-)
+    body: action === 'LOAD_PRODUCTS' ? undefined : JSON.stringify({ action, data }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`API call failed: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+export const useProductStore = create<ProductStore>((set, get) => ({
+  products: [],
+  isLoading: false,
+
+  loadProducts: async () => {
+    set({ isLoading: true })
+    try {
+      const result = await apiCall('LOAD_PRODUCTS')
+      if (result.success) {
+        set({ products: result.products })
+      }
+    } catch (error) {
+      console.error('Failed to load products:', error)
+    } finally {
+      set({ isLoading: false })
+    }
+  },
+
+  addProduct: async (productData) => {
+    const products = get().products
+    const slug = generateUniqueSlug(productData.name, products)
+    
+    try {
+      const result = await apiCall('ADD_PRODUCT', {
+        ...productData,
+        slug
+      })
+      
+      if (result.success) {
+        set({ products: [...products, result.product] })
+      }
+    } catch (error) {
+      console.error('Failed to add product:', error)
+      throw error
+    }
+  },
+
+  updateProduct: async (id, patch) => {
+    const products = get().products
+    const existingProduct = products.find(p => p.id === id)
+    
+    if (!existingProduct) {
+      throw new Error('Product not found')
+    }
+
+    // Generate new slug if name is being updated
+    let updates: any = { ...patch }
+    if (patch.name) {
+      updates.slug = generateUniqueSlug(patch.name, products, id)
+    }
+
+    try {
+      const result = await apiCall('UPDATE_PRODUCT', { id, updates })
+      
+      if (result.success) {
+        set({
+          products: products.map(p => p.id === id ? result.product : p)
+        })
+      }
+    } catch (error) {
+      console.error('Failed to update product:', error)
+      throw error
+    }
+  },
+
+  deleteProducts: async (ids) => {
+    try {
+      const result = await apiCall('DELETE_PRODUCTS', { ids })
+      
+      if (result.success) {
+        const products = get().products
+        set({
+          products: products.filter(p => !ids.includes(p.id))
+        })
+      }
+    } catch (error) {
+      console.error('Failed to delete products:', error)
+      throw error
+    }
+  },
+
+  duplicateProduct: async (id) => {
+    const product = get().getProduct(id)
+    if (!product) {
+      throw new Error('Product not found')
+    }
+
+    const duplicateData = {
+      ...product,
+      name: `${product.name} (Copy)`,
+      sku: `${product.sku}-COPY`,
+    }
+    
+    // Remove fields that will be auto-generated
+    delete (duplicateData as any).id
+    delete (duplicateData as any).createdAt
+    delete (duplicateData as any).slug
+
+    await get().addProduct(duplicateData)
+  },
+
+  importCsv: async (rows, strategy) => {
+    try {
+      if (strategy === "replace") {
+        const result = await apiCall('SET_PRODUCTS', { products: rows })
+        if (result.success) {
+          set({ products: result.products })
+        }
+      } else {
+        // Append strategy - add each product individually
+        for (const row of rows) {
+          const { id, createdAt, slug, ...productData } = row
+          await get().addProduct(productData)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to import CSV:', error)
+      throw error
+    }
+  },
+
+  exportCsv: (filtered) => {
+    const headers = [
+      "id",
+      "name",
+      "slug", 
+      "sku",
+      "priceLKR",
+      "stock",
+      "category",
+      "isActive",
+      "rating",
+      "images",
+      "description",
+    ]
+
+    const csvRows = [
+      headers.join(","),
+      ...filtered.map((product) =>
+        [
+          product.id,
+          `"${product.name}"`,
+          product.slug,
+          product.sku,
+          product.priceLKR,
+          product.stock,
+          product.category,
+          product.isActive,
+          product.rating,
+          `"${product.images.join("|")}"`,
+          `"${product.description || ""}"`,
+        ].join(","),
+      ),
+    ]
+
+    return csvRows.join("\n")
+  },
+
+  getProduct: (id) => {
+    return get().products.find((p) => p.id === id)
+  },
+}))

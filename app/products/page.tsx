@@ -19,13 +19,18 @@ import { useWishlist } from "@/hooks/use-wishlist"
 import { useProductStore } from "@/lib/stores/product-store"
 
 export default function ProductsPage() {
-  const { products: allProducts } = useProductStore()
+  const { products: allProducts, loadProducts } = useProductStore()
   const { wishlist, isLoaded: wishlistLoaded, toggleWishlist, isInWishlist } = useWishlist()
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const isMobile = useMobile()
   const searchParams = useSearchParams()
   const router = useRouter()
+
+  // Load products on mount
+  useEffect(() => {
+    loadProducts()
+  }, [loadProducts])
 
   // Initialize filters from URL parameters
   const [filters, setFilters] = useState<ProductFilters>(() => {
