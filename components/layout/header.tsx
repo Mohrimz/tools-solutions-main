@@ -9,9 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { MainNav } from "./main-nav"
 import { UserNav } from "./user-nav"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { Wrench, Search, Menu, Heart, Home, Package, Info, Phone } from "lucide-react"
+import { Wrench, Search, Menu, Heart, Home, Package, Info, Phone, User, LogIn } from "lucide-react"
 import { useWishlist } from "@/hooks/use-wishlist"
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 
 export function Header() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -64,7 +64,27 @@ export function Header() {
             </Link>
           </Button>
 
-          <ThemeToggle />
+          {/* Desktop Auth - Always Visible */}
+          <div className="flex items-center space-x-2">
+            <SignedOut>
+              <SignInButton mode="modal">
+                <Button variant="ghost" size="sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Sign In</span>
+                </Button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton 
+                appearance={{
+                  elements: {
+                    avatarBox: "h-8 w-8"
+                  }
+                }}
+              />
+            </SignedIn>
+          </div>
+
           <UserNav />
 
           {/* Mobile Menu */}
@@ -140,6 +160,28 @@ export function Header() {
                       Wishlist
                     </Link>
                   </Button>
+                  
+                  {/* Mobile Auth */}
+                  <SignedOut>
+                    <SignInButton mode="modal">
+                      <Button variant="outline" className="justify-start bg-transparent">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Sign In with Google
+                      </Button>
+                    </SignInButton>
+                  </SignedOut>
+                  <SignedIn>
+                    <div className="flex items-center space-x-3 p-2 rounded-md border">
+                      <UserButton 
+                        appearance={{
+                          elements: {
+                            avatarBox: "h-8 w-8"
+                          }
+                        }}
+                      />
+                      <span className="text-sm font-medium">Account</span>
+                    </div>
+                  </SignedIn>
                 </div>
               </div>
             </SheetContent>

@@ -77,7 +77,7 @@ export function getSearchParam(key: string): string | null {
 
 export function openWhatsAppForProduct(productName: string, price: number): void {
   const message = `Hi! I'm interested in purchasing the ${productName}. Price: ${formatPriceLKR(price)}. Could you please provide more details about availability and delivery?`
-  const whatsappNumber = "+94752441325"
+  const whatsappNumber = "0785566116"
   const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`
   
   // Open WhatsApp in a new tab

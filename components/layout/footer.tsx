@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, Linkedin } from "lucide-react"
+import { MapPin, Phone, Mail, Clock, Facebook, Instagram, MessageCircle } from "lucide-react"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -23,13 +23,13 @@ export function Footer() {
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span>123 Galle Road, Colombo 03</span>
               </div>
-                            <div className="flex items-center gap-3 text-sm">
+              <div className="flex items-center gap-3 text-sm">
                 <Phone className="h-4 w-4 text-primary" />
-                <span>+94 75 244 1325</span>
+                <span>0785566116</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <span>info@toolssolutions.lk</span>
+                <span>muiez7780@gmail.com</span>
               </div>
             </div>
           </div>
@@ -127,32 +127,31 @@ export function Footer() {
               <h4 className="text-sm font-medium">Follow Us</h4>
               <div className="flex gap-2">
                 <Link
-                  href="#"
+                  href="https://web.facebook.com/profile.php?id=61579374189392"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-2 rounded-md bg-muted hover:bg-muted/80 transition-colors"
                   aria-label="Facebook"
                 >
                   <Facebook className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="#"
+                  href="https://www.instagram.com/tools_solutions__/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-2 rounded-md bg-muted hover:bg-muted/80 transition-colors"
                   aria-label="Instagram"
                 >
                   <Instagram className="h-4 w-4" />
                 </Link>
                 <Link
-                  href="#"
+                  href="https://wa.me/0785566116"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="p-2 rounded-md bg-muted hover:bg-muted/80 transition-colors"
-                  aria-label="Twitter"
+                  aria-label="WhatsApp"
                 >
-                  <Twitter className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="#"
-                  className="p-2 rounded-md bg-muted hover:bg-muted/80 transition-colors"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-4 w-4" />
+                  <MessageCircle className="h-4 w-4" />
                 </Link>
               </div>
             </div>

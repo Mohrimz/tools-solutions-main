@@ -14,9 +14,16 @@ interface ProductFiltersBarProps {
 
 export function ProductFiltersBar({ filters, onFiltersChange }: ProductFiltersBarProps) {
   const updateFilter = (key: keyof ProductFilters, value: string | undefined) => {
+    let filterValue: any = value === "all" ? undefined : value
+    
+    // Convert rating to number
+    if (key === "rating" && filterValue) {
+      filterValue = Number(filterValue)
+    }
+    
     onFiltersChange({
       ...filters,
-      [key]: value === "all" ? undefined : value,
+      [key]: filterValue,
     })
   }
 
@@ -24,7 +31,7 @@ export function ProductFiltersBar({ filters, onFiltersChange }: ProductFiltersBa
     onFiltersChange({})
   }
 
-  const hasActiveFilters = filters.category || filters.status || filters.stock || filters.sortBy
+  const hasActiveFilters = filters.category || filters.status || filters.stock || filters.sortBy || filters.rating
 
   return (
     <div className="space-y-4">
@@ -64,6 +71,20 @@ export function ProductFiltersBar({ filters, onFiltersChange }: ProductFiltersBa
             <SelectItem value="in-stock">In Stock</SelectItem>
             <SelectItem value="low-stock">Low Stock</SelectItem>
             <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={filters.rating?.toString() || "all"} onValueChange={(value) => updateFilter("rating", value === "all" ? undefined : value)}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Rating" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Ratings</SelectItem>
+            <SelectItem value="5">5 Stars</SelectItem>
+            <SelectItem value="4">4+ Stars</SelectItem>
+            <SelectItem value="3">3+ Stars</SelectItem>
+            <SelectItem value="2">2+ Stars</SelectItem>
+            <SelectItem value="1">1+ Stars</SelectItem>
           </SelectContent>
         </Select>
 
@@ -107,6 +128,12 @@ export function ProductFiltersBar({ filters, onFiltersChange }: ProductFiltersBa
             <Badge variant="secondary" className="gap-1">
               Stock: {filters.stock.replace("-", " ")}
               <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("stock", undefined)} />
+            </Badge>
+          )}
+          {filters.rating && (
+            <Badge variant="secondary" className="gap-1">
+              Rating: {filters.rating}+ Stars
+              <X className="h-3 w-3 cursor-pointer" onClick={() => updateFilter("rating", undefined)} />
             </Badge>
           )}
         </div>

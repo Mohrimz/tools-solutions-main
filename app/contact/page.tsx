@@ -32,24 +32,45 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
 
-    toast({
-      title: "Message sent successfully!",
-      description: "We'll get back to you within 24 hours.",
-    })
+      const result = await response.json()
 
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      subject: "",
-      category: "",
-      message: "",
-    })
-    setIsSubmitting(false)
+      if (result.success) {
+        toast({
+          title: "Message sent successfully!",
+          description: "We'll get back to you within 24 hours.",
+        })
+
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "",
+          category: "",
+          message: "",
+        })
+      } else {
+        throw new Error(result.message || 'Failed to send message')
+      }
+    } catch (error) {
+      console.error('Contact form error:', error)
+      toast({
+        title: "Error sending message",
+        description: "Please try again or call us directly.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -97,10 +118,7 @@ export default function ContactPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <p className="text-sm">
-                <strong>Main:</strong> +94 11 234 5678
-              </p>
-              <p className="text-sm">
-                <strong>Mobile:</strong> +94 77 123 4567
+                <strong>Main:</strong> 785566116
               </p>
               <p className="text-xs text-muted-foreground">Available 8:00 AM - 6:00 PM</p>
             </CardContent>
@@ -115,13 +133,10 @@ export default function ContactPage() {
             </CardHeader>
             <CardContent className="space-y-2">
               <p className="text-sm">
-                <strong>General:</strong> info@toolssolutions.lk
+                <strong>Primary:</strong> muiez7780@gmail.com
               </p>
               <p className="text-sm">
-                <strong>Support:</strong> support@toolssolutions.lk
-              </p>
-              <p className="text-sm">
-                <strong>Orders:</strong> orders@toolssolutions.lk
+                <strong>Business:</strong> toolsolutions@gmail.com
               </p>
             </CardContent>
           </Card>

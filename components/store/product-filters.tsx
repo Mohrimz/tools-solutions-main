@@ -1,17 +1,7 @@
 "use client"
 
-import { Filter, Star, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import type { ProductFilters } from "@/lib/types"
 import { categories } from "@/lib/mock-data"
 
@@ -22,134 +12,76 @@ interface ProductFiltersProps {
 
 export function ProductFiltersComponent({ filters, onFiltersChange }: ProductFiltersProps) {
   const updateFilter = (key: keyof ProductFilters, value: string | number | undefined) => {
+    let filterValue: any = value === "all" ? undefined : value
+    
+    // Convert rating to number
+    if (key === "rating" && filterValue) {
+      filterValue = Number(filterValue)
+    }
+    
     onFiltersChange({
       ...filters,
-      [key]: value === "all" ? undefined : value,
+      [key]: filterValue,
     })
   }
 
   const clearFilters = () => {
-    onFiltersChange({ search: filters.search }) // Keep search when clearing other filters
+    onFiltersChange({ 
+      search: filters.search, 
+      category: undefined,
+      rating: undefined,
+      sortBy: "newest",
+      stock: undefined
+    })
   }
 
   const hasActiveFilters =
     filters.category || filters.rating || filters.stock || (filters.sortBy && filters.sortBy !== "newest")
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-4">
       {/* Category Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Filter className="mr-2 h-4 w-4" />
-            Category
-            {filters.category && filters.category !== "all" && (
-              <Badge variant="secondary" className="ml-2 h-5 px-1 text-xs">
-                {filters.category}
-              </Badge>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuLabel>Category</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem
-            checked={!filters.category || filters.category === "all"}
-            onCheckedChange={() => updateFilter("category", "all")}
-          >
-            All Categories
-          </DropdownMenuCheckboxItem>
+      <Select value={filters.category || "all"} onValueChange={(value) => updateFilter("category", value)}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Category" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Categories</SelectItem>
           {categories.map((category) => (
-            <DropdownMenuCheckboxItem
-              key={category}
-              checked={filters.category === category}
-              onCheckedChange={(checked) => updateFilter("category", checked ? category : "all")}
-            >
+            <SelectItem key={category} value={category}>
               {category}
-            </DropdownMenuCheckboxItem>
+            </SelectItem>
           ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </SelectContent>
+      </Select>
 
       {/* Stock Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Package className="mr-2 h-4 w-4" />
-            Stock
-            {filters.stock && (
-              <Badge variant="secondary" className="ml-2 h-5 px-1 text-xs">
-                {filters.stock === "in" ? "In" : filters.stock === "low" ? "Low" : "Out"}
-              </Badge>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuLabel>Stock Status</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem checked={!filters.stock} onCheckedChange={() => updateFilter("stock", undefined)}>
-            All Stock Levels
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={filters.stock === "in"}
-            onCheckedChange={(checked) => updateFilter("stock", checked ? "in" : undefined)}
-          >
-            In Stock
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={filters.stock === "low"}
-            onCheckedChange={(checked) => updateFilter("stock", checked ? "low" : undefined)}
-          >
-            Low Stock
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={filters.stock === "out"}
-            onCheckedChange={(checked) => updateFilter("stock", checked ? "out" : undefined)}
-          >
-            Out of Stock
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Select value={filters.stock || "all"} onValueChange={(value) => updateFilter("stock", value)}>
+        <SelectTrigger className="w-[140px]">
+          <SelectValue placeholder="Stock" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Stock</SelectItem>
+          <SelectItem value="in-stock">In Stock</SelectItem>
+          <SelectItem value="low-stock">Low Stock</SelectItem>
+          <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Rating Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm">
-            <Star className="mr-2 h-4 w-4" />
-            Rating
-            {filters.rating && (
-              <Badge variant="secondary" className="ml-2 h-5 px-1 text-xs">
-                {filters.rating}★+
-              </Badge>
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          <DropdownMenuLabel>Minimum Rating</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem checked={!filters.rating} onCheckedChange={() => updateFilter("rating", undefined)}>
-            All Ratings
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={filters.rating === 4.5}
-            onCheckedChange={(checked) => updateFilter("rating", checked ? 4.5 : undefined)}
-          >
-            4.5★ & above
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={filters.rating === 4}
-            onCheckedChange={(checked) => updateFilter("rating", checked ? 4 : undefined)}
-          >
-            4★ & above
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem
-            checked={filters.rating === 3}
-            onCheckedChange={(checked) => updateFilter("rating", checked ? 3 : undefined)}
-          >
-            3★ & above
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Select value={filters.rating?.toString() || "all"} onValueChange={(value) => updateFilter("rating", value === "all" ? undefined : value)}>
+        <SelectTrigger className="w-[140px]">
+          <SelectValue placeholder="Rating" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Ratings</SelectItem>
+          <SelectItem value="5">5 Stars</SelectItem>
+          <SelectItem value="4">4+ Stars</SelectItem>
+          <SelectItem value="3">3+ Stars</SelectItem>
+          <SelectItem value="2">2+ Stars</SelectItem>
+          <SelectItem value="1">1+ Stars</SelectItem>
+        </SelectContent>
+      </Select>
 
       {/* Sort */}
       <Select value={filters.sortBy || "newest"} onValueChange={(value) => updateFilter("sortBy", value)}>

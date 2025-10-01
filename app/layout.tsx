@@ -9,6 +9,7 @@ import { SkipLink } from "@/components/ui/skip-link"
 import { Suspense } from "react"
 import { Footer } from "@/components/layout/footer"
 import { ThemeProvider } from "@/components/theme-provider"
+import { ClerkProvider } from '@clerk/nextjs'
 import "./globals.css"
 import { Titillium_Web as V0_Font_Titillium_Web } from "next/font/google"
 
@@ -38,26 +39,28 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} ${titilliumWeb.variable}`}>
-        <ThemeProvider 
-          attribute="class" 
-          defaultTheme="system" 
-          enableSystem 
-          disableTransitionOnChange={false}
-          storageKey="tools-solutions-theme"
-        >
-          <SkipLink />
-          <Suspense fallback={<div>Loading...</div>}>
-            <div className="min-h-screen bg-background flex flex-col">
-              <Header />
-              <main tabIndex={-1} className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
-            <Toaster />
-          </Suspense>
-        </ThemeProvider>
-        <Analytics />
+        <ClerkProvider>
+          <ThemeProvider 
+            attribute="class" 
+            defaultTheme="system" 
+            enableSystem 
+            disableTransitionOnChange={false}
+            storageKey="tools-solutions-theme"
+          >
+            <SkipLink />
+            <Suspense fallback={<div>Loading...</div>}>
+              <div className="min-h-screen bg-background flex flex-col">
+                <Header />
+                <main tabIndex={-1} className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <Toaster />
+            </Suspense>
+          </ThemeProvider>
+          <Analytics />
+        </ClerkProvider>
       </body>
     </html>
   )

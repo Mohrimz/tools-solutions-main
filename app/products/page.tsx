@@ -23,24 +23,32 @@ export default function ProductsPage() {
   const { wishlist, isLoaded: wishlistLoaded, toggleWishlist, isInWishlist } = useWishlist()
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isInitialized, setIsInitialized] = useState(false)
   const isMobile = useMobile()
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  useEffect(() => {
-    if (!isInitialized) {
-      const initialFilters: ProductFilters = {
-        search: searchParams.get("search") || "",
-        category: searchParams.get("category") || "all",
-        rating: searchParams.get("rating") ? Number(searchParams.get("rating")) : undefined,
-        sortBy: (searchParams.get("sortBy") as ProductFilters["sortBy"]) || "newest",
-        stock: (searchParams.get("stock") as ProductFilters["stock"]) || undefined,
-      }
-      setFilters(initialFilters)
-      setIsInitialized(true)
+  // Initialize filters from URL parameters
+  const [filters, setFilters] = useState<ProductFilters>(() => {
+    return {
+      search: searchParams.get("search") || "",
+      category: searchParams.get("category") || "all",
+      rating: searchParams.get("rating") ? Number(searchParams.get("rating")) : undefined,
+      sortBy: (searchParams.get("sortBy") as ProductFilters["sortBy"]) || "newest",
+      stock: (searchParams.get("stock") as ProductFilters["stock"]) || undefined,
     }
-  }, [searchParams, isInitialized])
+  })
+
+  // Update filters when URL changes (for direct navigation)
+  useEffect(() => {
+    const newFilters: ProductFilters = {
+      search: searchParams.get("search") || "",
+      category: searchParams.get("category") || "all",
+      rating: searchParams.get("rating") ? Number(searchParams.get("rating")) : undefined,
+      sortBy: (searchParams.get("sortBy") as ProductFilters["sortBy"]) || "newest",
+      stock: (searchParams.get("stock") as ProductFilters["stock"]) || undefined,
+    }
+    setFilters(newFilters)
+  }, [searchParams])
 
   // Update URL when filters change
   const updateURL = useCallback(
@@ -57,40 +65,25 @@ export default function ProductsPage() {
     [router],
   )
 
-  const [filters, setFilters] = useState<ProductFilters>(() => {
-    // Initialize with default values first
-    return {
-      search: "",
-      category: "all",
-      rating: undefined,
-      sortBy: "newest",
-      stock: undefined,
-    }
-  })
-
   const debouncedSearch = useMemo(
     () =>
       debounce((search: string) => {
         setFilters((prevFilters) => {
           const newFilters = { ...prevFilters, search }
-          if (isInitialized) {
-            updateURL(newFilters)
-          }
+          updateURL(newFilters)
           return newFilters
         })
       }, 300),
-    [updateURL, isInitialized],
+    [updateURL],
   )
 
   // Handle filter changes
   const handleFiltersChange = useCallback(
     (newFilters: ProductFilters) => {
       setFilters(newFilters)
-      if (isInitialized) {
-        updateURL(newFilters)
-      }
+      updateURL(newFilters)
     },
-    [updateURL, isInitialized],
+    [updateURL],
   )
 
   // Filter and sort products
@@ -115,7 +108,13 @@ export default function ProductsPage() {
       }
       if (filters.stock) {
         const stockStatus = getStockStatus(product.stock)
-        if (stockStatus !== filters.stock) return false
+        // Map admin-style values to store values
+        const stockMapping = {
+          "in-stock": "in",
+          "low-stock": "low", 
+          "out-of-stock": "out"
+        }
+        if (stockMapping[filters.stock as keyof typeof stockMapping] !== stockStatus) return false
       }
       return true
     })
@@ -155,6 +154,11 @@ export default function ProductsPage() {
   }
 
   const handleQuickView = (product: Product) => {
+    setQuickViewProduct(product)
+  }
+
+  const handleProductClick = (product: Product) => {
+    // Show quick view modal instead of navigating
     setQuickViewProduct(product)
   }
 
@@ -251,6 +255,7 @@ export default function ProductsPage() {
                 isWishlisted={isInWishlist(product.id)}
                 onAddToWishlist={() => handleAddToWishlist(product.id)}
                 onQuickView={() => handleQuickView(product)}
+                onProductClick={() => handleProductClick(product)}
               />
             ))}
           </ProductGrid>

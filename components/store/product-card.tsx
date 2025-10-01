@@ -15,13 +15,29 @@ interface ProductCardProps {
   isWishlisted: boolean
   onAddToWishlist: () => void
   onQuickView: () => void
+  onProductClick?: () => void
 }
 
-export function ProductCard({ product, isWishlisted, onAddToWishlist, onQuickView }: ProductCardProps) {
+export function ProductCard({ product, isWishlisted, onAddToWishlist, onQuickView, onProductClick }: ProductCardProps) {
   const isOutOfStock = product.stock === 0
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't trigger if clicking on buttons
+    if ((e.target as HTMLElement).closest('button')) {
+      return
+    }
+    if (onProductClick) {
+      onProductClick()
+    } else {
+      onQuickView() // Fallback to quick view if no product click handler
+    }
+  }
+
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-lg">
+    <Card 
+      className="group overflow-hidden transition-all hover:shadow-lg cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="relative">
         <ImagePlaceholder
           src={product.images[0] || "/placeholder.svg"}

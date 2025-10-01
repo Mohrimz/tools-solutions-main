@@ -77,6 +77,9 @@ export default function AdminProductsPage() {
         const stockStatus = getStockStatus(product.stock)
         if (stockStatus !== filters.stock) return false
       }
+      if (filters.rating && product.rating < filters.rating) {
+        return false
+      }
       return true
     })
 
